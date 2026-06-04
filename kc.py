@@ -8,6 +8,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Configuration
 VIP_URL = "https://raw.githubusercontent.com/ShineLiveTV/my-keys-main/main/Koclay.txt"
 KEYS_URL = "https://raw.githubusercontent.com/ShineLiveTV/my-keys-main/main/keys.txt"
+HISTORY_FILE = "key_history.txt"
 USER_NAME, EXP_DATE, AUTHORIZED = "Me", "--", False
 VOUCHER_LIST = [str(i) for i in range(123400, 123501)]
 
@@ -84,6 +85,28 @@ def banner():
     print(f"\033[95m 👑 MASTER: {USER_NAME} | \033[92m📅 EXP: {EXP_DATE}")
     print("\033[93m" + "="*38 + "\033[0m")
 
+def save_to_history(key_line):
+    with open(HISTORY_FILE, "a") as f:
+        f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {key_line}\n")
+
+def view_history():
+    os.system('clear')
+    print("\033[96m" + "="*40)
+    print("      📜 KEY GENERATION HISTORY")
+    print("="*40 + "\033[0m")
+    if os.path.exists(HISTORY_FILE):
+        with open(HISTORY_FILE, "r") as f:
+            lines = f.readlines()
+            if not lines:
+                print("\033[91m [!] No history found.\033[0m")
+            else:
+                for line in lines[-15:]: # Show last 15 keys
+                    print(f"\033[97m {line.strip()}\033[0m")
+    else:
+        print("\033[91m [!] No history file found.\033[0m")
+    print("\033[96m" + "="*40 + "\033[0m")
+    input("\n\033[97m [~] Press Enter to return... \033[0m")
+
 def admin_key_gen():
     os.system('clear')
     print("\033[96m" + "="*40)
@@ -98,6 +121,7 @@ def admin_key_gen():
     if choice in durations:
         expiry = datetime.now() + timedelta(hours=durations[choice])
         final_line = f"{key_name} | {expiry.strftime('%Y-%m-%d %H:%M:%S')}"
+        save_to_history(final_line)
         print("\033[92m\n " + "="*38)
         print(" SUCCESS! COPY THE LINE BELOW:")
         print(" " + "="*38 + "\033[0m")
@@ -159,12 +183,17 @@ def launch():
         print("\033[91m [2] 🔥 Turbo Mode (加速) \033[0m")
         if uid == "u0_a304":
             print("\033[93m [3] 🔑 Admin: Key Generator \033[0m")
+            print("\033[94m [4] 📜 View Key History \033[0m")
         
         choice = input("\033[97m\n [?] Select Power: ")
         
-        if choice == "3" and uid == "u0_a304":
-            admin_key_gen()
-            continue
+        if uid == "u0_a304":
+            if choice == "3":
+                admin_key_gen()
+                continue
+            elif choice == "4":
+                view_history()
+                continue
         
         threads = 80 if choice == "2" else 50
         threading.Thread(target=show_ping_live, daemon=True).start()
