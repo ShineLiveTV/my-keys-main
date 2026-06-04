@@ -1,12 +1,13 @@
-import requests, re, urllib3, time, threading, os, random, subprocess, json, sys, socket
+import requests, re, urllib3, time, threading, os, random, subprocess, json, sys, socket, hashlib
 from urllib.parse import urlparse, parse_qs, urljoin
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Disable insecure request warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Configuration - Updated to your repository
+# Configuration
 VIP_URL = "https://raw.githubusercontent.com/ShineLiveTV/my-keys-main/main/Koclay.txt"
+KEYS_URL = "https://raw.githubusercontent.com/ShineLiveTV/my-keys-main/main/keys.txt"
 USER_NAME, EXP_DATE, AUTHORIZED = "Me", "--", False
 VOUCHER_LIST = [str(i) for i in range(123400, 123501)]
 
@@ -14,22 +15,42 @@ AI_STATUS = "Discovery"
 LAST_PING = 0
 STOP_THREADS = threading.Event()
 
-def get_advanced_headers():
-    browsers = [
-        f"Mozilla/5.0 (iPhone; CPU iPhone OS {random.randint(15,17)}_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
-        f"Mozilla/5.0 (Linux; Android {random.randint(11,14)}; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"
-    ]
-    return {
-        "User-Agent": random.choice(browsers),
-        "Accept": "*/*",
-        "Connection": "keep-alive"
-    }
+def get_device_info():
+    try:
+        # Get Device ID (using whoami + hash of some system info)
+        uid = subprocess.check_output(['whoami']).decode('utf-8').strip()
+        # Get Device Model
+        model = subprocess.check_output(['getprop', 'ro.product.model']).decode('utf-8').strip()
+        if not model:
+            model = "Android Device"
+        return uid, model
+    except:
+        return "Unknown", "Android Device"
+
+def check_key(user_key):
+    try:
+        res = requests.get(f"{KEYS_URL}?cb={random.random()}", timeout=7)
+        if res.status_code == 200:
+            for line in res.text.splitlines():
+                if '|' in line:
+                    parts = line.split('|')
+                    stored_key = parts[0].strip()
+                    exp_dt_str = parts[1].strip()
+                    
+                    if user_key == stored_key:
+                        exp_dt = datetime.strptime(exp_dt_str, '%Y-%m-%d %H:%M:%S')
+                        if datetime.now() < exp_dt:
+                            return True, exp_dt_str
+                        else:
+                            return False, "Expired"
+        return False, "Invalid"
+    except:
+        return False, "Error"
 
 def update_status():
     global USER_NAME, EXP_DATE, AUTHORIZED
     try:
-        # Get Termux/Linux user ID
-        uid = subprocess.check_output(['whoami']).decode('utf-8').strip()
+        uid, _ = get_device_info()
         res = requests.get(f"{VIP_URL}?cb={random.random()}", timeout=7)
         if res.status_code == 200:
             for line in res.text.splitlines():
@@ -42,18 +63,37 @@ def update_status():
         pass
 
 def banner():
+    uid, model = get_device_info()
     os.system('clear')
     print("\033[93m" + "="*38)
-    print("\033[43m  \033[42m  \033[41m  \033[0m \033[96m" + " KoCLay MASTER ULTIMATE V3.5 " + "\033[41m  \033[42m  \033[43m  \033[0m")
+    print("\033[43m  \033[42m  \033[41m  \033[0m \033[96m" + " SHINE KOKO MASTER ULTIMATE V3.5 " + "\033[41m  \033[42m  \033[43m  \033[0m")
     print("\033[96m" + r'''
-    █▄  █▄  ██████  ███████  █▄      █████  █▄   █▄
-    ██  █  █  █      █      █  █     █  █  █  █  █  
-    █████  █   ███   ███     █     ███████  █████  
-    █  ██  █   █      █      █     █  █  █  █  █  
-    █  █  █  ██████  ██████  █▄  █  █  █  █  
+     ██████  ██   ██ ██ ███    ██ ███████ 
+    ██      ██   ██ ██ ████   ██ ██      
+    ███████ ███████ ██ ██ ██  ██ █████   
+         ██ ██   ██ ██ ██  ██ ██ ██      
+    ███████ ██   ██ ██ ██   ████ ███████ 
+                                         
+     ██   ██  ██████  ██   ██  ██████  
+     ██  ██  ██    ██ ██  ██  ██    ██ 
+     █████   ██    ██ █████   ██    ██ 
+     ██  ██  ██    ██ ██  ██  ██    ██ 
+     ██   ██  ██████  ██   ██  ██████  
     ''')
+    print(f"\033[94m 📱 DEVICE: {model} | ID: {uid}")
     print(f"\033[95m 👑 MASTER: {USER_NAME} | \033[92m📅 EXP: {EXP_DATE}")
     print("\033[93m" + "="*38 + "\033[0m")
+
+def get_advanced_headers():
+    browsers = [
+        f"Mozilla/5.0 (iPhone; CPU iPhone OS {random.randint(15,17)}_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+        f"Mozilla/5.0 (Linux; Android {random.randint(11,14)}; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"
+    ]
+    return {
+        "User-Agent": random.choice(browsers),
+        "Accept": "*/*",
+        "Connection": "keep-alive"
+    }
 
 def show_ping_live():
     while True:
@@ -65,7 +105,7 @@ def show_ping_live():
 
 def turbo_pulse(link, mode):
     global LAST_PING, AI_STATUS
-    payload = "koclay" * 5
+    payload = "shinekoko" * 5
     while not STOP_THREADS.is_set():
         try:
             start = time.time()
@@ -77,10 +117,24 @@ def turbo_pulse(link, mode):
             AI_STATUS = "Rescue"; time.sleep(0.5)
 
 def launch():
-    global AI_STATUS, STOP_THREADS
+    global AI_STATUS, STOP_THREADS, USER_NAME, EXP_DATE, AUTHORIZED
     update_status()
     banner()
     
+    if not AUTHORIZED:
+        print("\033[91m [!] This device is not pre-authorized. \033[0m")
+        user_key = input("\033[97m [?] Enter License Key: ")
+        is_valid, info = check_key(user_key)
+        if is_valid:
+            print(f"\033[92m [✓] Key Accepted! Expires: {info} \033[0m")
+            USER_NAME = "Premium User"
+            EXP_DATE = info
+            time.sleep(2)
+            banner()
+        else:
+            print(f"\033[91m [✗] Access Denied: {info} \033[0m")
+            sys.exit()
+
     print("\033[92m [1] 🧠 Balanced Mode (穩定) \033[0m")
     print("\033[91m [2] 🔥 Turbo Mode (加速) \033[0m")
     choice = input("\033[97m\n [?] Select Power: ")
@@ -89,20 +143,17 @@ def launch():
     threading.Thread(target=show_ping_live, daemon=True).start()
 
     session = requests.Session()
-    print(f"\n\033[93m[*] Starting engine with {threads} threads...\033[0m")
+    print(f"\n\033[93m[*] Starting SHINE KOKO engine with {threads} threads...\033[0m")
     
     while True:
         try:
             STOP_THREADS.clear()
-            # Check for captive portal
             r = requests.get("http://connectivitycheck.gstatic.com/generate_204", timeout=8)
             p_url = r.url
             parsed = urlparse(p_url)
             
-            # If redirected, we found a login page
             if "generate_204" not in p_url:
                 print(f"\033[96m[*] Found portal: {parsed.netloc}\033[0m")
-                
                 gw = parse_qs(parsed.query).get('gw_address', [parsed.netloc.split(':')[0]])[0]
                 if not gw: gw = socket.gethostbyname(parsed.netloc)
                 
@@ -137,9 +188,8 @@ def launch():
                 else:
                     AI_STATUS = "Discovery"; time.sleep(2)
             else:
-                # No redirect, already have internet
                 AI_STATUS = "Online"; 
-                sys.stdout.write(f"\r \033[92m[*] You are already connected to the internet. Monitoring...\033[0m")
+                sys.stdout.write(f"\r \033[92m[*] SHINE KOKO: Internet is active. Monitoring...\033[0m")
                 sys.stdout.flush()
                 time.sleep(5)
                 
