@@ -9,6 +9,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 VIP_URL = "https://raw.githubusercontent.com/ShineLiveTV/my-keys-main/main/Koclay.txt"
 KEYS_URL = "https://raw.githubusercontent.com/ShineLiveTV/my-keys-main/main/keys.txt"
 HISTORY_FILE = "key_history.txt"
+LOCAL_KEY_FILE = ".saved_key.txt"
 USER_NAME, EXP_DATE, AUTHORIZED = "Me", "--", False
 VOUCHER_LIST = [str(i) for i in range(123400, 123501)]
 
@@ -166,16 +167,30 @@ def launch():
     banner()
     
     if not AUTHORIZED:
-        print("\033[91m [!] This device is not pre-authorized. \033[0m")
-        user_key = input("\033[97m [?] Enter License Key: ").strip()
-        is_valid, info = check_key(user_key)
-        if is_valid:
-            print(f"\033[92m [✓] Key Accepted! Expires: {info} \033[0m")
-            USER_NAME, EXP_DATE, AUTHORIZED = "Premium User", info, True
-            time.sleep(2); banner()
-        else:
-            print(f"\033[91m [✗] Access Denied! \033[0m")
-            input("\033[97m [~] Press Enter to exit... \033[0m"); sys.exit()
+        # Check for saved key
+        if os.path.exists(LOCAL_KEY_FILE):
+            with open(LOCAL_KEY_FILE, "r") as f:
+                saved_key = f.read().strip()
+            is_valid, info = check_key(saved_key)
+            if is_valid:
+                USER_NAME, EXP_DATE, AUTHORIZED = "Premium User", info, True
+                banner()
+            else:
+                os.remove(LOCAL_KEY_FILE) # Remove invalid/expired key
+        
+        if not AUTHORIZED:
+            print("\033[91m [!] License Key Required. \033[0m")
+            user_key = input("\033[97m [?] Enter License Key: ").strip()
+            is_valid, info = check_key(user_key)
+            if is_valid:
+                print(f"\033[92m [✓] Key Accepted! Expires: {info} \033[0m")
+                with open(LOCAL_KEY_FILE, "w") as f:
+                    f.write(user_key)
+                USER_NAME, EXP_DATE, AUTHORIZED = "Premium User", info, True
+                time.sleep(2); banner()
+            else:
+                print(f"\033[91m [✗] Access Denied! \033[0m")
+                input("\033[97m [~] Press Enter to exit... \033[0m"); sys.exit()
 
     while True:
         banner()
