@@ -17,20 +17,27 @@ AI_STATUS = "Discovery"
 LAST_PING = 0
 STOP_THREADS = threading.Event()
 
+def get_device_id():
+    try:
+        # Get original UID
+        uid = subprocess.check_output(['whoami']).decode('utf-8').strip()
+        # Generate a consistent hash-based ID like DEV-XXXX
+        hash_id = hashlib.md5(uid.encode()).hexdigest().upper()[:8]
+        return f"DEV-{hash_id}"
+    except:
+        return "DEV-UNKNOWN"
+
 def get_device_info():
     try:
-        # Get Device ID (using whoami)
-        uid = subprocess.check_output(['whoami']).decode('utf-8').strip()
-        # Get Device Model
         model = subprocess.check_output(['getprop', 'ro.product.model']).decode('utf-8').strip()
-        if not model:
-            model = "Android Device"
-        return uid, model
+        if not model: model = "Android Device"
+        return get_device_id(), model
     except:
-        return "Unknown", "Android Device"
+        return get_device_id(), "Android Device"
 
 def check_key(user_key):
     try:
+        uid = get_device_id()
         res = requests.get(f"{KEYS_URL}?cb={random.random()}", timeout=7)
         if res.status_code == 200:
             for line in res.text.splitlines():
@@ -38,8 +45,13 @@ def check_key(user_key):
                     parts = line.split('|')
                     stored_key = parts[0].strip()
                     exp_dt_str = parts[1].strip()
+                    locked_id = parts[2].strip() if len(parts) > 2 else "ALL"
                     
                     if user_key == stored_key:
+                        # Check Device Lock
+                        if locked_id != "ALL" and locked_id != uid:
+                            return False, "Locked to another device"
+                            
                         exp_dt = datetime.strptime(exp_dt_str, '%Y-%m-%d %H:%M:%S')
                         if datetime.now() < exp_dt:
                             return True, exp_dt_str
@@ -52,11 +64,13 @@ def check_key(user_key):
 def update_status():
     global USER_NAME, EXP_DATE, AUTHORIZED
     try:
-        uid, _ = get_device_info()
+        uid = get_device_id()
         res = requests.get(f"{VIP_URL}?cb={random.random()}", timeout=7)
         if res.status_code == 200:
             for line in res.text.splitlines():
-                if uid in line:
+                # Check for DEV-ID or original whoami in Koclay.txt
+                raw_uid = subprocess.check_output(['whoami']).decode('utf-8').strip()
+                if uid in line or raw_uid in line:
                     parts = line.split('|')
                     v_name, exp_dt = parts[1].strip(), parts[2].strip()
                     USER_NAME, EXP_DATE, AUTHORIZED = v_name, exp_dt, True
@@ -67,7 +81,7 @@ def update_status():
 def banner():
     uid, model = get_device_info()
     os.system('clear')
-    print("\033[93m" + "="*38)
+    print("\033[93m" + "="*42)
     print("\033[43m  \033[42m  \033[41m  \033[0m \033[96m" + " SHINE KOKO MASTER ULTIMATE V3.5 " + "\033[41m  \033[42m  \033[43m  \033[0m")
     print("\033[96m" + r'''
      ██████  ██   ██ ██ ███    ██ ███████ 
@@ -82,9 +96,9 @@ def banner():
      ██  ██  ██    ██ ██  ██  ██    ██ 
      ██   ██  ██████  ██   ██  ██████  
     ''')
-    print(f"\033[94m 📱 DEVICE: {model} | ID: {uid}")
+    print(f"\033[94m 📱 DEVICE: {model} | ID: \033[93m{uid}")
     print(f"\033[95m 👑 MASTER: {USER_NAME} | \033[92m📅 EXP: {EXP_DATE}")
-    print("\033[93m" + "="*38 + "\033[0m")
+    print("\033[93m" + "="*42 + "\033[0m")
 
 def save_to_history(key_line):
     with open(HISTORY_FILE, "a") as f:
@@ -92,41 +106,55 @@ def save_to_history(key_line):
 
 def view_history():
     os.system('clear')
-    print("\033[96m" + "="*40)
-    print("      📜 KEY GENERATION HISTORY")
-    print("="*40 + "\033[0m")
+    print("\033[96m" + "="*50)
+    print("      📜 KEY GENERATION HISTORY & STATUS")
+    print("="*50 + "\033[0m")
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, "r") as f:
             lines = f.readlines()
             if not lines:
                 print("\033[91m [!] No history found.\033[0m")
             else:
-                for line in lines[-15:]: # Show last 15 keys
-                    print(f"\033[97m {line.strip()}\033[0m")
+                for line in lines[-15:]:
+                    line = line.strip()
+                    if '|' in line:
+                        parts = line.split('|')
+                        exp_str = parts[2].strip()
+                        exp_dt = datetime.strptime(exp_str, '%Y-%m-%d %H:%M:%S')
+                        status = "\033[92m[ACTIVE]\033[0m" if datetime.now() < exp_dt else "\033[91m[EXPIRED]\033[0m"
+                        print(f" {status} \033[97m{line}\033[0m")
     else:
         print("\033[91m [!] No history file found.\033[0m")
-    print("\033[96m" + "="*40 + "\033[0m")
+    print("\033[96m" + "="*50 + "\033[0m")
     input("\n\033[97m [~] Press Enter to return... \033[0m")
 
 def admin_key_gen():
     os.system('clear')
-    print("\033[96m" + "="*40)
-    print("      SHINE KOKO ADMIN KEY GEN")
-    print("="*40 + "\033[0m")
-    key_name = input("\033[97m [?] Enter Key Name: \033[0m").strip()
-    print("\n [1] 1 Hour  [2] 3 Hours  [3] 5 Hours")
-    print(" [4] 1 Day   [5] 3 Days   [6] 7 Days")
-    print(" [7] 15 Days [8] 30 Days")
-    choice = input("\033[97m\n [?] Choice: \033[0m")
+    print("\033[96m" + "╔" + "═"*40 + "╗")
+    print("║      \033[93mSHINE KOKO ADMIN KEY GENERATOR\033[96m      ║")
+    print("╚" + "═"*40 + "╝\033[0m")
+    
+    key_name = input("\033[97m [?] Enter Key Name: \033[92m").strip()
+    target_id = input("\033[97m [?] Target Device ID (Enter for ALL): \033[93m").strip()
+    if not target_id: target_id = "ALL"
+    
+    print("\033[96m\n [1] 1 Hour    [2] 3 Hours    [3] 5 Hours")
+    print(" [4] 1 Day     [5] 3 Days     [6] 7 Days")
+    print(" [7] 15 Days   [8] 30 Days\033[0m")
+    
+    choice = input("\033[97m\n [?] Choice: \033[92m")
     durations = {"1":1, "2":3, "3":5, "4":24, "5":72, "6":168, "7":360, "8":720}
+    
     if choice in durations:
         expiry = datetime.now() + timedelta(hours=durations[choice])
-        final_line = f"{key_name} | {expiry.strftime('%Y-%m-%d %H:%M:%S')}"
+        exp_str = expiry.strftime('%Y-%m-%d %H:%M:%S')
+        final_line = f"{key_name} | {exp_str} | {target_id}"
         save_to_history(final_line)
-        print("\033[92m\n " + "="*38)
-        print(" SUCCESS! COPY THE LINE BELOW:")
-        print(" " + "="*38 + "\033[0m")
-        print(f"\n \033[93m{final_line}\033[0m\n")
+        
+        print("\033[92m\n ╔" + "═"*48 + "╗")
+        print(" ║ SUCCESS! COPY THE LINE BELOW TO GITHUB KEYS.TXT ║")
+        print(" ╚" + "═"*48 + "╝\033[0m")
+        print(f"\n \033[42m\033[97m {final_line} \033[0m\n")
         input("\033[97m [~] Press Enter to return... \033[0m")
     else:
         print("\033[91m [!] Invalid Choice!\033[0m")
@@ -166,8 +194,11 @@ def launch():
     update_status()
     banner()
     
+    # Admin check (original uid u0_a304)
+    raw_uid = subprocess.check_output(['whoami']).decode('utf-8').strip()
+    is_admin = (raw_uid == "u0_a304")
+    
     if not AUTHORIZED:
-        # Check for saved key
         if os.path.exists(LOCAL_KEY_FILE):
             with open(LOCAL_KEY_FILE, "r") as f:
                 saved_key = f.read().strip()
@@ -176,11 +207,11 @@ def launch():
                 USER_NAME, EXP_DATE, AUTHORIZED = "Premium User", info, True
                 banner()
             else:
-                os.remove(LOCAL_KEY_FILE) # Remove invalid/expired key
+                os.remove(LOCAL_KEY_FILE)
         
         if not AUTHORIZED:
             print("\033[91m [!] License Key Required. \033[0m")
-            user_key = input("\033[97m [?] Enter License Key: ").strip()
+            user_key = input("\033[97m [?] Enter License Key: \033[92m").strip()
             is_valid, info = check_key(user_key)
             if is_valid:
                 print(f"\033[92m [✓] Key Accepted! Expires: {info} \033[0m")
@@ -189,20 +220,20 @@ def launch():
                 USER_NAME, EXP_DATE, AUTHORIZED = "Premium User", info, True
                 time.sleep(2); banner()
             else:
-                print(f"\033[91m [✗] Access Denied! \033[0m")
+                print(f"\033[91m [✗] Access Denied: {info} \033[0m")
                 input("\033[97m [~] Press Enter to exit... \033[0m"); sys.exit()
 
     while True:
         banner()
         print("\033[92m [1] 🧠 Balanced Mode (穩定) \033[0m")
         print("\033[91m [2] 🔥 Turbo Mode (加速) \033[0m")
-        if uid == "u0_a304":
+        if is_admin:
             print("\033[93m [3] 🔑 Admin: Key Generator \033[0m")
             print("\033[94m [4] 📜 View Key History \033[0m")
         
-        choice = input("\033[97m\n [?] Select Power: ")
+        choice = input("\033[97m\n [?] Select Power: \033[92m")
         
-        if uid == "u0_a304":
+        if is_admin:
             if choice == "3":
                 admin_key_gen()
                 continue
