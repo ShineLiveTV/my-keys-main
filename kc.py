@@ -1,4 +1,4 @@
-import requests, re, urllib3, time, threading, os, random, subprocess, json, sys, socket, hashlib
+import requests, re, urllib3, time, threading, os, random, subprocess, json, sys, socket, hashlib, base64
 from urllib.parse import urlparse, parse_qs, urljoin
 from datetime import datetime, timedelta
 
@@ -6,10 +6,13 @@ from datetime import datetime, timedelta
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Configuration
-VIP_URL = "https://raw.githubusercontent.com/ShineLiveTV/my-keys-main/main/Koclay.txt"
-KEYS_URL = "https://raw.githubusercontent.com/ShineLiveTV/my-keys-main/main/keys.txt"
+REPO_OWNER = "ShineLiveTV"
+REPO_NAME = "my-keys-main"
+VIP_URL = f"https://raw.githubusercontent.com/{REPO_OWNER}/{REPO_NAME}/main/Koclay.txt"
+KEYS_URL = f"https://raw.githubusercontent.com/{REPO_OWNER}/{REPO_NAME}/main/keys.txt"
 HISTORY_FILE = "key_history.txt"
 LOCAL_KEY_FILE = ".saved_key.txt"
+GITHUB_TOKEN_FILE = ".gh_token.txt"
 USER_NAME, EXP_DATE, AUTHORIZED = "Me", "--", False
 VOUCHER_LIST = [str(i) for i in range(123400, 123501)]
 
@@ -19,9 +22,7 @@ STOP_THREADS = threading.Event()
 
 def get_device_id():
     try:
-        # Get original UID
         uid = subprocess.check_output(['whoami']).decode('utf-8').strip()
-        # Generate a consistent hash-based ID like DEV-XXXX
         hash_id = hashlib.md5(uid.encode()).hexdigest().upper()[:8]
         return f"DEV-{hash_id}"
     except:
@@ -48,10 +49,8 @@ def check_key(user_key):
                     locked_id = parts[2].strip() if len(parts) > 2 else "ALL"
                     
                     if user_key == stored_key:
-                        # Check Device Lock
                         if locked_id != "ALL" and locked_id != uid:
                             return False, "Locked to another device"
-                            
                         exp_dt = datetime.strptime(exp_dt_str, '%Y-%m-%d %H:%M:%S')
                         if datetime.now() < exp_dt:
                             return True, exp_dt_str
@@ -68,7 +67,6 @@ def update_status():
         res = requests.get(f"{VIP_URL}?cb={random.random()}", timeout=7)
         if res.status_code == 200:
             for line in res.text.splitlines():
-                # Check for DEV-ID or original whoami in Koclay.txt
                 raw_uid = subprocess.check_output(['whoami']).decode('utf-8').strip()
                 if uid in line or raw_uid in line:
                     parts = line.split('|')
@@ -128,6 +126,44 @@ def view_history():
     print("\033[96m" + "="*50 + "\033[0m")
     input("\n\033[97m [~] Press Enter to return... \033[0m")
 
+def update_github_keys(new_line):
+    if not os.path.exists(GITHUB_TOKEN_FILE):
+        print("\033[91m [!] GitHub Token not found. Please set it up first.\033[0m")
+        token = input("\033[97m [?] Enter GitHub Token: \033[92m").strip()
+        with open(GITHUB_TOKEN_FILE, "w") as f: f.write(token)
+    
+    with open(GITHUB_TOKEN_FILE, "r") as f: token = f.read().strip()
+    
+    headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
+    api_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/keys.txt"
+    
+    try:
+        # Get current file content and SHA
+        res = requests.get(api_url, headers=headers)
+        if res.status_code == 200:
+            data = res.json()
+            sha = data['sha']
+            current_content = base64.b64decode(data['content']).decode('utf-8')
+            new_content = current_content.strip() + "\n" + new_line
+            
+            # Update file
+            payload = {
+                "message": f"Add new key: {new_line.split('|')[0].strip()}",
+                "content": base64.b64encode(new_content.encode()).decode('utf-8'),
+                "sha": sha
+            }
+            put_res = requests.put(api_url, headers=headers, json=payload)
+            if put_res.status_code == 200:
+                print("\033[92m [✓] GitHub keys.txt updated automatically!\033[0m")
+                return True
+            else:
+                print(f"\033[91m [✗] Failed to update GitHub: {put_res.status_code}\033[0m")
+        else:
+            print(f"\033[91m [✗] Failed to get keys.txt from GitHub: {res.status_code}\033[0m")
+    except Exception as e:
+        print(f"\033[91m [!] Error: {str(e)}\033[0m")
+    return False
+
 def admin_key_gen():
     os.system('clear')
     print("\033[96m" + "╔" + "═"*40 + "╗")
@@ -151,11 +187,16 @@ def admin_key_gen():
         final_line = f"{key_name} | {exp_str} | {target_id}"
         save_to_history(final_line)
         
-        print("\033[92m\n ╔" + "═"*48 + "╗")
-        print(" ║ SUCCESS! COPY THE LINE BELOW TO GITHUB KEYS.TXT ║")
-        print(" ╚" + "═"*48 + "╝\033[0m")
-        print(f"\n \033[42m\033[97m {final_line} \033[0m\n")
-        input("\033[97m [~] Press Enter to return... \033[0m")
+        print(f"\n \033[93m[*] Generated: {final_line}\033[0m")
+        print("\033[96m [*] Attempting Auto-Update to GitHub...\033[0m")
+        
+        if update_github_keys(final_line):
+            print("\033[92m\n [✓] Key is now LIVE! User can use it immediately.\033[0m")
+        else:
+            print("\033[93m\n [!] Auto-Update failed. Please add it manually to GitHub.\033[0m")
+            print(f" \033[43m\033[30m {final_line} \033[0m")
+            
+        input("\n\033[97m [~] Press Enter to return... \033[0m")
     else:
         print("\033[91m [!] Invalid Choice!\033[0m")
         time.sleep(2)
@@ -194,7 +235,6 @@ def launch():
     update_status()
     banner()
     
-    # Admin check (original uid u0_a304)
     raw_uid = subprocess.check_output(['whoami']).decode('utf-8').strip()
     is_admin = (raw_uid == "u0_a304")
     
@@ -228,7 +268,7 @@ def launch():
         print("\033[92m [1] 🧠 Balanced Mode (穩定) \033[0m")
         print("\033[91m [2] 🔥 Turbo Mode (加速) \033[0m")
         if is_admin:
-            print("\033[93m [3] 🔑 Admin: Key Generator \033[0m")
+            print("\033[93m [3] 🔑 Admin: Key Generator (Auto-Update) \033[0m")
             print("\033[94m [4] 📜 View Key History \033[0m")
         
         choice = input("\033[97m\n [?] Select Power: \033[92m")
